@@ -31,7 +31,6 @@ var Genetic = cc.Class.extend({
             this.probability.push(sum + (i+1)/this.totalScore);
             sum += (i+1)/this.totalScore;
         }
-        //cc.log(this.probability);
     },
     seedRandom: function() {
         var data = {};
@@ -63,14 +62,25 @@ var Genetic = cc.Class.extend({
     },
     randomInteger: function(min,max)
     {
-        //cc.log(min + " " + max);
         return Math.floor(Math.random()*(max-min+1)+min);
     },
     comparator: function (a,b) {
         return a.fitness - b.fitness;
     },
     sortIndividual: function(){
+        //var tempData = this.population[this.sizePop-1].fitness;
         this.population.sort(this.comparator);
+        if(this.highestFitness > this.population[this.sizePop-1].fitness){
+            cc.log("Something wrong");
+            /*
+            for(var k = 0; k < this.population.length; k++){
+                cc.log(this.population[k].fitness);
+            }
+            */
+            cc.log("Delta: " + (this.highestFitness - this.population[this.sizePop-1].fitness));
+            //cc.log("Temp: " + tempData);
+            //cc.log(this.population)
+        }
         this.highestFitness = this.population[this.sizePop-1].fitness;
         //cc.log("Highest fitness: " + this.population[this.sizePop-1].fitness);
     },
@@ -107,8 +117,6 @@ var Genetic = cc.Class.extend({
         }
     },
     evolve: function(){
-        //var newPopulation = [];
-        //cc.log("Generation: " + this.generation);
         this.sortIndividual();
         this.generation++;
         var newGenPopulation = [];
@@ -123,14 +131,26 @@ var Genetic = cc.Class.extend({
             //newPopulation.push({"individual" : newIndividual1,"fitness" : 0});
             //newPopulation.push({"individual" : newIndividual2,"fitness" : 0});
         }
+        var numCrossover = 0;
         for(var i = 0; i < this.sizePop-2; i++){
-            while(Math.random() < 0.05){
-                var mutePoint = this.randomInteger(0, newGenPopulation[0].length-1);
-                newGenPopulation[i][mutePoint]= Math.random()*1000 - 500;
+            if(Math.random() < 0.1){
+                for(var k = 0; k < newGenPopulation[0].length; k++){
+                    if(Math.random() < 0.2){
+                        newGenPopulation[i][k]= Math.random()*1000 - 500;
+                        numCrossover++;
+                    }
+                }
             }
+            /*
+             while(Math.random() < 0.2){
+             var mutePoint = this.randomInteger(0, newGenPopulation[0].length-1);
+             newGenPopulation[i][mutePoint]= Math.random()*1000 - 500;
+             numCrossover++;
+             }
+            */
             this.population[i].individual.decode(newGenPopulation[i]);
-            this.population[i].fitness = 0;
+            //this.population[i].fitness = 0;
         }
-        //cc.log("Population: " + this.population.length);
+        //cc.log("numCrossover: " + numCrossover);
     }
 });

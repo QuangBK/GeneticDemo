@@ -96,20 +96,27 @@ var Network = cc.Class.extend({
                 gen.push(this.W1[i][j]);
             }
         }
+
         for(i = 0; i < this.b1.length; i++){
-            for(j = 0; j < this.b1[i].length; j++){
-                gen.push(this.b1[i][j]);
-            }
+            gen.push(this.b1[i]);
         }
+
         for(i = 0; i < this.W2.length; i++){
             for(j = 0; j < this.W2[i].length; j++){
                 gen.push(this.W2[i][j]);
             }
         }
+
         for(i = 0; i < this.b2.length; i++){
-            for(j = 0; j < this.b2[i].length; j++){
-                gen.push(this.b2[i][j]);
-            }
+            gen.push(this.b2[i]);
+        }
+
+        if(gen.length != (7*15+15+15*3+3)){
+            cc.log("Wrong Encode: " + gen.length);
+            cc.log("Wrong Encode: " + this.W1.length);
+            cc.log("Wrong Encode: " + this.b1.length);
+            cc.log("Wrong Encode: " + this.W2.length);
+            cc.log("Wrong Encode: " + this.b2.length);
         }
         return gen;
     },
@@ -124,10 +131,8 @@ var Network = cc.Class.extend({
             }
         }
         for(i = 0; i < this.b1.length; i++){
-            for(j = 0; j < this.b1[i].length; j++){
-                this.b1[i][j] = gen[index];
-                index++;
-            }
+            this.b1[i] = gen[index];
+            index++;
         }
         for(i = 0; i < this.W2.length; i++){
             for(j = 0; j < this.W2[i].length; j++){
@@ -136,11 +141,11 @@ var Network = cc.Class.extend({
             }
         }
         for(i = 0; i < this.b2.length; i++){
-            for(j = 0; j < this.b2[i].length; j++){
-                this.b2[i][j] = gen[index];
-                index++;
-            }
+            this.b2[i] = gen[index];
+            index++;
         }
+        if(index != (7*15+15+15*3+3))
+            cc.log("Wrong decode: " + gen.length);
     },
     writeWeight: function(){
         cc.log("X: ");

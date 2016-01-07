@@ -4,6 +4,7 @@
 var CarSprite = cc.Node.extend({
     sprite:null,
     point1:null,
+    radar:null,
     /** Constructor
      * @param {cc.SpriteBatchNode *}
      * @param {cp.Space *}
@@ -14,18 +15,18 @@ var CarSprite = cc.Node.extend({
         // init coin animation
         this.x = x;
         this.y = y;
-        this.sprite = new cc.DrawNode();
-        this.sprite.clear();
+        this.radar = new cc.DrawNode();
+        this.radar.clear();
         //cc.p(pos.x -this.size,pos.y - this.size)
         this.point1 = cc.p(0,0);
-        this.sprite.drawSegment(this.point1, cc.p(0,100), 1, cc.color.WHITE);
-        this.sprite.drawSegment(this.point1, cc.p(100*Math.sin(30*Math.PI/180), 100*Math.cos(30*Math.PI/180)), 1, cc.color.WHITE);
-        this.sprite.drawSegment(this.point1, cc.p(100*Math.sin(60*Math.PI/180), 100*Math.cos(60*Math.PI/180)), 1, cc.color.WHITE);
-        this.sprite.drawSegment(this.point1, cc.p(100*Math.sin(90*Math.PI/180), 100*Math.cos(90*Math.PI/180)), 1, cc.color.WHITE);
-        this.sprite.drawSegment(this.point1, cc.p(100*Math.sin(-30*Math.PI/180), 100*Math.cos(-30*Math.PI/180)), 1, cc.color.WHITE);
-        this.sprite.drawSegment(this.point1, cc.p(100*Math.sin(-60*Math.PI/180), 100*Math.cos(-60*Math.PI/180)), 1, cc.color.WHITE);
-        this.sprite.drawSegment(this.point1, cc.p(100*Math.sin(-90*Math.PI/180), 100*Math.cos(-90*Math.PI/180)), 1, cc.color.WHITE);
-        this.addChild(this.sprite,1);
+        this.radar.drawSegment(this.point1, cc.p(0,100), 1, cc.color.WHITE);
+        this.radar.drawSegment(this.point1, cc.p(100*Math.sin(30*Math.PI/180), 100*Math.cos(30*Math.PI/180)), 1, cc.color.WHITE);
+        this.radar.drawSegment(this.point1, cc.p(100*Math.sin(60*Math.PI/180), 100*Math.cos(60*Math.PI/180)), 1, cc.color.WHITE);
+        this.radar.drawSegment(this.point1, cc.p(100*Math.sin(90*Math.PI/180), 100*Math.cos(90*Math.PI/180)), 1, cc.color.WHITE);
+        this.radar.drawSegment(this.point1, cc.p(100*Math.sin(-30*Math.PI/180), 100*Math.cos(-30*Math.PI/180)), 1, cc.color.WHITE);
+        this.radar.drawSegment(this.point1, cc.p(100*Math.sin(-60*Math.PI/180), 100*Math.cos(-60*Math.PI/180)), 1, cc.color.WHITE);
+        this.radar.drawSegment(this.point1, cc.p(100*Math.sin(-90*Math.PI/180), 100*Math.cos(-90*Math.PI/180)), 1, cc.color.WHITE);
+        this.addChild(this.radar,1);
 
         this.sprite = new cc.Sprite(res.carPicture);
         this.sprite.attr({
@@ -46,6 +47,11 @@ var CarSprite = cc.Node.extend({
     removeFromParent:function () {
         this.sprite.removeFromParent();
         this.sprite = null;
+        this.radar.removeFromParent();
+        this.radar = null;
+    },
+    setShowRadar: function(){
+        this.radar.setVisible(!this.radar.isVisible());
     },
     update:function (dt) {
     }
