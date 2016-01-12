@@ -111,7 +111,7 @@ var Network = cc.Class.extend({
             gen.push(this.b2[i]);
         }
 
-        if(gen.length != (7*15+15+15*3+3)){
+        if(gen.length != (10*16+16+16*3+3)){
             cc.log("Wrong Encode: " + gen.length);
             cc.log("Wrong Encode: " + this.W1.length);
             cc.log("Wrong Encode: " + this.b1.length);
@@ -144,7 +144,7 @@ var Network = cc.Class.extend({
             this.b2[i] = gen[index];
             index++;
         }
-        if(index != (7*15+15+15*3+3))
+        if(index != (10*16+16+16*3+3))
             cc.log("Wrong decode: " + gen.length);
     },
     writeWeight: function(){

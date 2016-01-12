@@ -3,10 +3,10 @@
  */
 var Genetic = cc.Class.extend({
     population: [],
-    sizePop: 20,//must even number
-    inputNode : 7,
+    sizePop: 50,//must even number
+    inputNode : 10,
     outputNode : 3,
-    hiddenNode : 15,
+    hiddenNode : 16,
     totalScore: 0,
     probability: [],
     genLength: 0,

@@ -5,6 +5,8 @@ var CarSprite = cc.Node.extend({
     sprite:null,
     point1:null,
     radar:null,
+    directionAngle: 0,
+    directionRadar: null,
     /** Constructor
      * @param {cc.SpriteBatchNode *}
      * @param {cp.Space *}
@@ -27,6 +29,12 @@ var CarSprite = cc.Node.extend({
         this.radar.drawSegment(this.point1, cc.p(100*Math.sin(-60*Math.PI/180), 100*Math.cos(-60*Math.PI/180)), 1, cc.color.WHITE);
         this.radar.drawSegment(this.point1, cc.p(100*Math.sin(-90*Math.PI/180), 100*Math.cos(-90*Math.PI/180)), 1, cc.color.WHITE);
         this.addChild(this.radar,1);
+
+        this.directionRadar = new cc.DrawNode();
+        this.directionRadar.clear();
+        this.directionRadar.drawSegment(this.point1, cc.p(100*Math.sin(this.directionAngle*Math.PI/180),
+            100*Math.cos(this.directionAngle*Math.PI/180)), 1, cc.color.GREEN);
+        this.addChild(this.directionRadar,2);
 
         this.sprite = new cc.Sprite(res.carPicture);
         this.sprite.attr({
@@ -52,6 +60,12 @@ var CarSprite = cc.Node.extend({
     },
     setShowRadar: function(){
         this.radar.setVisible(!this.radar.isVisible());
+    },
+    setDirectionAngle: function(angle){
+        this.directionAngle = angle;//-this.getRotation()*Math.PI/180;
+        this.directionRadar.clear();
+        this.directionRadar.drawSegment(this.point1, cc.p(100*Math.sin(this.directionAngle),
+            100*Math.cos(this.directionAngle)), 1, cc.color.GREEN);
     },
     update:function (dt) {
     }
