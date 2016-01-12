@@ -208,6 +208,8 @@ var HelloWorldLayer = cc.Layer.extend({
                             target.forwardToIndividual(49);
                             break;
                         case 77:    //m
+                            var data = {"key" : 1};
+                            $.post( "http://localhost:3000/api/sendData", {city:"HCM"});
                             break;
                         case 81:    //q
                             target.update(0.015);
