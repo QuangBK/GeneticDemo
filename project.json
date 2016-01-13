@@ -16,6 +16,7 @@
         "src/Network.js",
         "src/Genetic.js",
         "src/lineDraw.js",
-        "src/CarSprite.js"
+        "src/CarSprite.js",
+        "src/GraphTest.js"
     ]
 }
