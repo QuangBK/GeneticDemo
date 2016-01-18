@@ -82,6 +82,7 @@ var GraphTest = cc.Layer.extend({
         cc.log("Draw Done");
     },
     testDemo1: function(){
+        /*
         var W1 = [[0.7611729970667511,0.9843872827477753],
             [0.6247300098184496,0.9328937255777419],
             [0.6916288626380265,0.9645904337521642],
@@ -93,6 +94,7 @@ var GraphTest = cc.Layer.extend({
         var b2 = [0.9470303524285555];
         this.ANN.setData({"W1": W1, "W2": W2, "b1": b1, "b2": b2});
         this.ANN.forPropForBackProp([0.3, 0.7],[1]);
+        */
         this.ANN.writeWeight();
     },
     funcTest : function(x){

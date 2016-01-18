@@ -7,6 +7,7 @@ var CarSprite = cc.Node.extend({
     radar:null,
     directionAngle: 0,
     directionRadar: null,
+    freeAngle: null,
     /** Constructor
      * @param {cc.SpriteBatchNode *}
      * @param {cp.Space *}
@@ -35,6 +36,9 @@ var CarSprite = cc.Node.extend({
         this.directionRadar.drawSegment(this.point1, cc.p(100*Math.sin(this.directionAngle*Math.PI/180),
             100*Math.cos(this.directionAngle*Math.PI/180)), 1, cc.color.GREEN);
         this.addChild(this.directionRadar,2);
+
+        this.freeAngle = new cc.DrawNode();
+        this.addChild(this.freeAngle,2);
 
         this.sprite = new cc.Sprite(res.carPicture);
         this.sprite.attr({
@@ -66,6 +70,13 @@ var CarSprite = cc.Node.extend({
         this.directionRadar.clear();
         this.directionRadar.drawSegment(this.point1, cc.p(100*Math.sin(this.directionAngle),
             100*Math.cos(this.directionAngle)), 1, cc.color.GREEN);
+    },
+    setFreeAngle: function(fL, fR){
+        this.freeAngle.clear();
+        this.freeAngle.drawSegment(this.point1, cc.p(100*Math.sin(this.directionAngle-(180-fL)*Math.PI/180),
+            100*Math.cos(this.directionAngle-(180-fL)*Math.PI/180)), 1, cc.color.RED);
+        this.freeAngle.drawSegment(this.point1, cc.p(100*Math.sin(this.directionAngle+(180-fR)*Math.PI/180),
+            100*Math.cos(this.directionAngle+(180-fR)*Math.PI/180)), 1, cc.color.RED);
     },
     update:function (dt) {
     }

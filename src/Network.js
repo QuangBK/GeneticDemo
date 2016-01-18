@@ -177,7 +177,7 @@ var Network = cc.Class.extend({
         };
         var W1grad = this.MapIndexedInPlace(this.W1.length, this.W1[0].length, funcW1);
 
-        this.backProp(0.2, W1grad, b1grad, W2grad, b2grad);
+        this.backProp(0.01, W1grad, b1grad, W2grad, b2grad);
         /*
          b2grad.MapIndexedInplace((i, j, c) => dh3[i, 0] * 2 * diff[i, 0]);
          W2grad.MapIndexedInplace((i, j, c) => b2grad[i, 0] * h2[j, 0]);

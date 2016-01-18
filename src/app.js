@@ -42,6 +42,11 @@ var HelloWorldLayer = cc.Layer.extend({
     freeLeft: 0,
     freeRight: 0,
     freeAngleSprite: null,
+    manual: true,
+    ANN: null,
+    checkAutoDrive: false,
+    sizeOfTrain: 0,
+    dataTrain : [],
     ctor:function () {
         //////////////////////////////
         // 1. super init first
@@ -155,18 +160,21 @@ var HelloWorldLayer = cc.Layer.extend({
             this.lineArray[i].setVisible(!this.lineArray[i].isVisible());
         }
 
-
+        this.ANN = new Network(10,3,16);
         if( 'keyboard' in cc.sys.capabilities ) {
             cc.eventManager.addListener({
                 event: cc.EventListener.KEYBOARD,
                 onKeyPressed:function(key, event) {
                     var target = event.getCurrentTarget();
-                    cc.log("Key: " + key);
+                    //cc.log("Key: " + key);
                     switch(key) {
                         case 37:
                             target.angleCar -= 8;
                             if(target.angleCar < 0){;
                                 target.angleCar += 360;
+                            }
+                            if(target.manual){
+                                target.updateManual([0,1,0]);
                             }
                             break;
                         case 39:
@@ -174,9 +182,15 @@ var HelloWorldLayer = cc.Layer.extend({
                             if(target.angleCar >= 360){
                                 target.angleCar -= 360;
                             }
+                            if(target.manual){
+                                target.updateManual([0,0,1]);
+                            }
                             break;
                         case 38:
                             target.velocityCar = 80;
+                            if(target.manual){
+                                target.updateManual([1,0,0]);
+                            }
                             break;
                         case 40:
                             target.velocityCar = -80;
@@ -194,6 +208,12 @@ var HelloWorldLayer = cc.Layer.extend({
                             for(var i = 0; i < target.lineArray.length; i++){
                                 target.lineArray[i].setVisible(!target.lineArray[i].isVisible());
                             }
+                            break;
+                        case 52:    //4
+                            target.checkAutoDrive = !target.checkAutoDrive;
+                            break;
+                        case 53:    //5
+                            target.trainANN();
                             break;
                         case 83:    //s
                             target.autoRun(700);
@@ -349,8 +369,12 @@ var HelloWorldLayer = cc.Layer.extend({
         }
     },
     runCar: function(input, dt){
-        var output = this.GAs.population[this.currentIndividual].individual.forprop(input);
-
+        var output = [];
+        if(this.manual){
+            output = this.ANN.forprop(input);
+        } else {
+            output = this.GAs.population[this.currentIndividual].individual.forprop(input);
+        }
         this.s += this.velocityCar*dt;
         if(output[0] > output[1] && output[0] > output[2]){
             this.autoDrive(38);
@@ -360,6 +384,36 @@ var HelloWorldLayer = cc.Layer.extend({
             } else {
                 this.autoDrive(39);
             }
+        }
+    },
+    goNextSetup: function(){
+        this.die = false;
+        this.timeout = 0;
+        this.timeTurn = 0;
+        this.checkTurn = false;
+        this.s = 0;
+        for(var i = 0; i < 7; i++){
+            this.posRadar[i].distance = 100;
+        }
+        //var indexT = 0;//this.randomInteger(0,3);
+        //cc.log(indexT);
+        if(this.indexI >= 3){
+            this.indexI = 0;
+            this.fitnessValue = 0;
+        }
+        else{
+            this.indexI++;
+        }
+
+        this.carSprite.x = this.xI[this.indexI];
+        this.carSprite.y = this.yI[this.indexI];
+        //this.carSprite.rotation = ;
+        this.angleCar = this.angleI[this.indexI];
+        this.destinationSprite.clear();
+        this.destinationSprite.drawCircle(cc.p(this.xO[this.indexI], this.yO[this.indexI]), 3, 0.3, 15, false, 7, cc.color(0,250,255));
+        this.velocityCar = 0;
+        if(this.indexI != 0){
+            return;
         }
     },
     updateResult: function(){
@@ -418,12 +472,37 @@ var HelloWorldLayer = cc.Layer.extend({
             this.textHighestFitness.setString("Highest Fitness: " + this.GAs.highestFitness);
         }
     },
+    updateManual: function(output){
+        var input = this.posRadar.map(function(a) {return a.distance*4/100;});
+        var deltaAngleDirection = this.getDeltaAngle();
+        if(deltaAngleDirection > 180)
+            deltaAngleDirection -= 360;
+        if(deltaAngleDirection < -180)
+            deltaAngleDirection += 360;
+        input.push(deltaAngleDirection*4/180);
+        input.push(this.freeLeft*4/180);
+        input.push(this.freeRight*4/180);
+        //this.ANN.forPropForBackProp(input, output);
+        this.dataTrain.push({"X": input, "Y": output});
+        this.sizeOfTrain++;
+        //cc.log(this.dataTrain[this.dataTrain.length-1]);
+    },
+    trainANN: function(){
+        cc.log("Begin: " + this.sizeOfTrain);
+        for(var i = 0; i < 5000; i++){
+            var indexT = this.randomInteger(0, this.sizeOfTrain-1);
+            //cc.log(this.dataTrain[indexT]);
+            this.ANN.forPropForBackProp(this.dataTrain[indexT].X, this.dataTrain[indexT].Y);
+        }
+        //this.ANN.writeWeight();
+        cc.log("Done");
+    },
     testIndividual: function(dt){
         this.timeout += dt*10;
         if(this.checkTurn)
             this.timeTurn +=dt*10;
         //cc.log(this.timeout);
-        var input = this.posRadar.map(function(a) {return a.distance;});
+        var input = this.posRadar.map(function(a) {return a.distance*4/100;});
         var deltaAngleDirection = this.getDeltaAngle();
         if(deltaAngleDirection > 180)
             deltaAngleDirection -= 360;
@@ -431,7 +510,7 @@ var HelloWorldLayer = cc.Layer.extend({
             deltaAngleDirection += 360;
         this.carSprite.setDirectionAngle(deltaAngleDirection*Math.PI/180);
 
-        input.push(deltaAngleDirection);
+        input.push(deltaAngleDirection*4/180);
         var middleAngleIndex = deltaAngleDirection/30 + 3;
         //cc.log(deltaAngleDirection);
         var checkL = false;
@@ -444,7 +523,7 @@ var HelloWorldLayer = cc.Layer.extend({
             //cc.log(middleAngleIndex);
             for(var k = 0; k < 7; k++){
                 if(k < middleAngleIndex){               //Right
-                    if(this.posRadar[k].distance < 30){     //Wall
+                    if(this.posRadar[k].distance < 100){     //Wall
 
                     } else {                                //No Wall
                         if(this.freeRight < (30*k)){
@@ -453,7 +532,7 @@ var HelloWorldLayer = cc.Layer.extend({
                         }
                     }
                 } else {                                //Left
-                    if(this.posRadar[k].distance < 30){     //Wall
+                    if(this.posRadar[k].distance < 100){     //Wall
 
                     } else {                                //No Wall
                         if(this.freeLeft < (30*(k-middleAngleIndex)))
@@ -465,14 +544,14 @@ var HelloWorldLayer = cc.Layer.extend({
         } else {
             for(var k = 0; k < 7; k++){
                 if(k < middleAngleIndex){               //Left
-                    if(this.posRadar[k].distance < 30){     //Wall
+                    if(this.posRadar[k].distance < 100){     //Wall
 
                     } else {                                //No Wall
                         this.freeLeft = 180 - 30*(middleAngleIndex - k);
                         checkL = true;
                     }
                 } else {                                //Right
-                    if(this.posRadar[k].distance < 30){     //Wall
+                    if(this.posRadar[k].distance < 100){     //Wall
 
                     } else {                                //No Wall
                         this.freeRight = 180 - 30*(k - middleAngleIndex);
@@ -490,22 +569,39 @@ var HelloWorldLayer = cc.Layer.extend({
             //cc.log([0,this.freeLeft, this.freeRight]);
         }
 
-        input.push(this.freeLeft);
-        input.push(this.freeRight);
+        input.push(this.freeLeft*4/180);
+        input.push(this.freeRight*4/180);
+        this.carSprite.setFreeAngle(this.freeLeft, this.freeRight);
         //cc.log([this.freeLeft, this.freeRight]);
         //cc.log(input);
-        this.runCar(input, dt);
+
+        //If control car manual, comment this lin
+        if(this.checkAutoDrive)
+            this.runCar(input, dt);
 
 
         var distanceCheck = (Math.pow((this.carSprite.x-this.xO[this.indexI]),2)+Math.pow((this.carSprite.y-this.yO[this.indexI]),2));
-        if(this.timeTurn > 30 || this.timeout > 200 || distanceCheck < 10000){//|| this.timeout > 200
-            this.updateResult();
-            return;
-        }
-        for(var i = 0; i < this.posRadar.length; i++){
-            if(this.posRadar[i].distance < 20){
-                this.die = true;
+        if(!this.manual){
+            if(this.timeTurn > 30 || this.timeout > 200 || distanceCheck < 10000){//|| this.timeout > 200
                 this.updateResult();
+                return;
+            }
+            for(var i = 0; i < this.posRadar.length; i++){
+                if(this.posRadar[i].distance < 20){
+                    this.die = true;
+                    this.updateResult();
+                }
+            }
+        } else {
+            if(distanceCheck < 10000){//|| this.timeout > 200
+                this.goNextSetup();
+                return;
+            }
+            for(var i = 0; i < this.posRadar.length; i++){
+                if(this.posRadar[i].distance < 20){
+                    this.goNextSetup();
+                    return;
+                }
             }
         }
     },
@@ -599,8 +695,8 @@ var HelloWorldLayer = cc.Layer.extend({
 var HelloWorldScene = cc.Scene.extend({
     onEnter:function () {
         this._super();
-        //var layer = new HelloWorldLayer();
-        var layer = new GraphTest();
+        var layer = new HelloWorldLayer();
+        //var layer = new GraphTest();
         this.addChild(layer);
     }
 });
